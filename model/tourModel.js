@@ -5,9 +5,14 @@ const tourSchema = new mongoose.Schema(
         name: {
             type: String,
             required: [true, 'A tour must have a name'],
-            unique: true
+            unique: true,
+            trim: true,
+            maxlength: [
+                40,
+                'A tour must have less or equal then 40 characters'
+            ],
+            minlength: [10, 'A tour must have more or equal then 10 characters']
         },
-        slug: String,
         duration: {
             type: Number,
             required: [true, 'A tour must have a duration']
@@ -18,11 +23,17 @@ const tourSchema = new mongoose.Schema(
         },
         difficulty: {
             type: String,
-            required: [true, 'Tour must have a difficulty']
+            required: [true, 'Tour must have a difficulty'],
+            enum: {
+                values: ['easy', 'medium', 'difficult'],
+                message: 'Difficulty is either: easy, medium or difficult'
+            }
         },
         ratingsAverage: {
             type: Number,
-            default: 4.5
+            default: 4.5,
+            min: [1, 'Rating must be above 1.0'],
+            max: [5, 'Rating must be below 5.0']
         },
         ratingsQuantity: {
             type: Number,
@@ -79,6 +90,8 @@ tourSchema.virtual('durationWeeks').get(function() {
 //     next();
 // });
 
+// QUERY MIDDLEWARE
+
 // tourSchema.pre(/^find/, function(next) {
 //     this.find({ secretTour: { $ne: true } });
 
@@ -91,6 +104,8 @@ tourSchema.virtual('durationWeeks').get(function() {
 
 //     next();
 // });
+
+//AGGREGATION MIDDLEWARE
 
 // tourSchema.pre('aggregate', function(next) {
 //     this.pipeline().unshift({
