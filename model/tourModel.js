@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 // const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
@@ -19,6 +20,7 @@ const tourSchema = new mongoose.Schema(
             //     'Tour name must only contain characters'
             // ]
         },
+        slug: String,
         duration: {
             type: Number,
             required: [true, 'A tour must have a duration']
@@ -123,6 +125,11 @@ const tourSchema = new mongoose.Schema(
     }
 );
 
+// Ajout d'un index sur le pri
+// tourSchema.index({ price: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 tourSchema.virtual('durationWeeks').get(function() {
     return this.duration / 7;
 });
@@ -131,6 +138,12 @@ tourSchema.virtual('reviews', {
     ref: 'Review',
     foreignField: 'tour',
     localField: '_id'
+});
+
+// DOCUMENT MIDDLEWARE: runs before .save() and .create()
+tourSchema.pre('save', function(next) {
+    this.slug = slugify(this.name, { lower: true });
+    next();
 });
 
 /* EXEMPLE OF EMBEDING
@@ -162,12 +175,12 @@ tourSchema.pre(/^find/, function(next) {
     next();
 });
 
-// tourSchema.pre(/^find/, function(next) {
-//     this.find({ secretTour: { $ne: true } });
+tourSchema.pre(/^find/, function(next) {
+    this.find({ secretTour: { $ne: true } });
 
-//     this.start = Date.now();
-//     next();
-// });
+    this.start = Date.now();
+    next();
+});
 
 // tourSchema.post(/^find/, function(docs, next) {
 //     console.log(Date.now() - this.start);
