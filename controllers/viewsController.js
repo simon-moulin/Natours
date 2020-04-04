@@ -22,7 +22,7 @@ exports.getTour = catchAsync(async (req, res) => {
     // 2) Create pug template
 
     res.status(200).render('tour', {
-        title: 'The Forest Hiker Tour',
+        title: `${tour.name} Tour`,
         tour
     });
 });
